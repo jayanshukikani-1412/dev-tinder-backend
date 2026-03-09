@@ -48,6 +48,7 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+// User Delete API ==>> DELETE /user ==>> delete user from database
 app.delete("/user", async (req, res) => {
   const userId = req.body.userId;
   try {
@@ -61,6 +62,7 @@ app.delete("/user", async (req, res) => {
   }
 });
 
+// User Update API ==>> PATCH /user ==>> update user from database
 app.patch("/user", async (req, res) => {
   const userId = req.body.userId;
   const data = req.body;
