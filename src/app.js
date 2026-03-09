@@ -42,19 +42,16 @@ app.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
 
-    const dbUser = await User.findOne({ emailId: emailId });
-    if (!dbUser) {
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
       throw new Error("Invalid credentials");
     }
 
-    const hashPassword = dbUser.password;
-    const isPasswordValid = await bcrypt.compare(password, hashPassword);
+    const isPasswordValid = await user.validatePassword(password);
 
     if (isPasswordValid) {
       // Create JWT token
-      const token = await jwt.sign({ _id: dbUser._id }, "DEV@Tinder$790", {
-        expiresIn: 60 * 60,
-      });
+      const token = await user.getJWT();
       // Add the token to cookie and send the response back to the user
 
       res.cookie("token", token, {
@@ -71,6 +68,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Profile API ==>> GET /profile ==>> get user profile details
 app.get("/profile", userAuth, async (req, res) => {
   try {
     const user = req.user;
