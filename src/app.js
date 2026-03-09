@@ -15,7 +15,7 @@ app.post("/signup", async (req, res) => {
     res.send("User added successfully");
   } catch (error) {
     console.log("Error", error);
-    res.status(400).send("Error saving the user: "+ error.message);
+    res.status(400).send("Error saving the user: " + error.message);
   }
 });
 
@@ -25,7 +25,7 @@ app.get("/user", async (req, res) => {
   try {
     const user = await User.find({ emailId: userEmail });
     if (user.length === 0) {
-      res.status(404).send("User not found : "+ error.message);
+      res.status(404).send("User not found : " + error.message);
     } else {
       res.send(user);
     }
@@ -39,12 +39,12 @@ app.get("/feed", async (req, res) => {
   try {
     const users = await User.find({});
     if (users.length === 0) {
-      res.status(404).send("User not found : "+ error.message);
+      res.status(404).send("User not found : " + error.message);
     } else {
       res.send(users);
     }
   } catch (error) {
-    res.status(400).send("Something went wrong : "+ error.message);
+    res.status(400).send("Something went wrong : " + error.message);
   }
 });
 
@@ -54,7 +54,7 @@ app.delete("/user", async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(userId);
     if (!user) {
-      return res.status(404).send("User not found : "+ error.message);
+      return res.status(404).send("User not found : " + error.message);
     }
     res.send(user);
   } catch (error) {
@@ -67,13 +67,22 @@ app.patch("/user", async (req, res) => {
   const userId = req.body.userId;
   const data = req.body;
   try {
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k),
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error("Updates not allowed");
+    }
+
     const user = await User.findByIdAndUpdate({ _id: userId }, data);
     if (!user) {
-      return res.status(404).send("User not found : "+ error.message);
+      return res.status(404).send("User not found : " + error.message);
     }
     res.send("User updated successfully");
   } catch (error) {
-    res.status(400).send("Something went wrong : "+ error.message);
+    res.status(400).send("Something went wrong : " + error.message);
   }
 });
 
