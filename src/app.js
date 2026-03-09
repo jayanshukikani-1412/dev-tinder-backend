@@ -8,6 +8,7 @@ const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -51,10 +52,16 @@ app.post("/login", async (req, res) => {
 
     if (isPasswordValid) {
       // Create JWT token
-      const token = await jwt.sign({ _id: dbUser._id }, "DEV@Tinder$790");
+      const token = await jwt.sign({ _id: dbUser._id }, "DEV@Tinder$790", {
+        expiresIn: 60 * 60,
+      });
       // Add the token to cookie and send the response back to the user
 
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 10 * 3600000),
+        secure: true,
+      });
       res.send("User logged in successfully!!");
     } else {
       throw new Error("Invalid credentials");
@@ -64,22 +71,9 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const cookie = req.cookies;
-    const { token } = cookie;
-    if (!token) {
-      throw new Error("Token not found in cookies");
-    }
-    // validate token
-  
-    const decodedMessage = await jwt.verify(token, "DEV@Tinder$790");
-    const { _id } = decodedMessage;
-    const user = await User.findById(_id);
-    if (!user) {
-      throw new Error("User data not found")
-    }
-  
+    const user = req.user;
     res.send(user);
   } catch (error) {
     res.status(400).send("Error : " + error.message);
@@ -87,7 +81,7 @@ app.get("/profile", async (req, res) => {
 });
 
 // Find User By Email ==>> GET /user ==>> find one user from email
-app.get("/user", async (req, res) => {
+app.get("/user", userAuth, async (req, res) => {
   const userEmail = req.body.emailId;
   try {
     const user = await User.find({ emailId: userEmail });
@@ -102,7 +96,7 @@ app.get("/user", async (req, res) => {
 });
 
 // User Feed API ==>> GET /feed ==>> get all the users from the database
-app.get("/feed", async (req, res) => {
+app.get("/feed", userAuth, async (req, res) => {
   try {
     const users = await User.find({});
     if (users.length === 0) {
@@ -116,7 +110,7 @@ app.get("/feed", async (req, res) => {
 });
 
 // User Delete API ==>> DELETE /user ==>> delete user from database
-app.delete("/user", async (req, res) => {
+app.delete("/user", userAuth, async (req, res) => {
   const userId = req.body.userId;
   try {
     const user = await User.findByIdAndDelete(userId);
@@ -130,7 +124,7 @@ app.delete("/user", async (req, res) => {
 });
 
 // User Update API ==>> PATCH /user ==>> update user from database
-app.patch("/user", async (req, res) => {
+app.patch("/user", userAuth, async (req, res) => {
   const userId = req.body.userId;
   const data = req.body;
   try {
@@ -151,6 +145,11 @@ app.patch("/user", async (req, res) => {
   } catch (error) {
     res.status(400).send("Something went wrong : " + error.message);
   }
+});
+
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+  const user = req.user;
+  res.send(user.firstName + " sent connection request !!");
 });
 
 connectDB()
