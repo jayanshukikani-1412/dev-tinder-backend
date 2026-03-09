@@ -1,25 +1,20 @@
 // Importing express
 const express = require("express");
-require("./config/database");
+const connectDB = require("./config/database");
 // Instance of express application
 const app = express();
 
-// Listening to the port 8080
-app.listen(8080, () => {
-  console.log("Server is successfully running on port 8080");
-});
-
-
-
-
-
-
-
-
-
-
-
-
+connectDB()
+  .then(() => {
+    console.log("Database connected successfully")
+    // Listening to the port 8080
+    app.listen(8080, () => {
+      console.log("Server is successfully running on port 8080");
+    });
+  })
+  .catch(() => {
+    console.log("Error from database: ", error);
+  });
 
 // Hello Request Handler
 // app.use("/api/hello", (req, res) => {
@@ -52,7 +47,6 @@ app.listen(8080, () => {
 // app.delete("/api/users/:id", (req, res) => {
 //   res.send("User deleted successfully");
 // });
-
 
 // app.use("/", (req, res) => {
 //   res.send("Namaste From Server");
