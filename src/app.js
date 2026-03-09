@@ -3,6 +3,22 @@ const express = require("express");
 const connectDB = require("./config/database");
 // Instance of express application
 const app = express();
+const User = require("./models/user")
+
+app.use(express.json());
+ 
+app.post("/signup", async (req, res) => {
+console.log("req", req.body)
+  const user = new User(req.body)
+
+  try {
+    await user.save()
+    res.send("User added successfully")
+  } catch (error) {
+    console.log("Error", error)
+    res.status(400).send("Error saving the user: ", error.message)
+  }
+})
 
 connectDB()
   .then(() => {
@@ -15,39 +31,3 @@ connectDB()
   .catch(() => {
     console.log("Error from database: ", error);
   });
-
-// Hello Request Handler
-// app.use("/api/hello", (req, res) => {
-//   res.send("Hello From Server");
-// });
-
-// Test Request Handler
-// app.use("/api/test", (req, res) => {
-//   res.send("Test From Server");
-// });
-
-// app.get("/api/users", (req, res) => {
-//   res.send([
-//     {
-//       id: 1,
-//       name: "John Doe",
-//       email: "john.doe@example.com",
-//     },
-//   ]);
-// });
-
-// app.post("/api/users", (req, res) => {
-//   res.send("User created successfully");
-// });
-
-// app.put("/api/users/:id", (req, res) => {
-//   res.send("User updated successfully");
-// });
-
-// app.delete("/api/users/:id", (req, res) => {
-//   res.send("User deleted successfully");
-// });
-
-// app.use("/", (req, res) => {
-//   res.send("Namaste From Server");
-// });
