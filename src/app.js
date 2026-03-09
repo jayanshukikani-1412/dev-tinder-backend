@@ -1,6 +1,6 @@
 // Importing express
 const express = require("express");
-
+require("./config/database");
 // Instance of express application
 const app = express();
 
@@ -8,6 +8,14 @@ const app = express();
 app.listen(8080, () => {
   console.log("Server is successfully running on port 8080");
 });
+
+
+
+
+
+
+
+
 
 
 
