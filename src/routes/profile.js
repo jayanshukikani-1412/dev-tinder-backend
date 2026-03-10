@@ -1,7 +1,7 @@
 const express = require("express");
 const { userAuth } = require("../middleware/auth");
 const { validateEditProfileData } = require("../utils/validation");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 
 const profileRouter = express.Router();
 
@@ -9,7 +9,7 @@ const profileRouter = express.Router();
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
-    res.send(user);
+    res.json({ message: "Data fetched Successfully", data: user });
   } catch (error) {
     res.status(400).send("Error : " + error.message);
   }

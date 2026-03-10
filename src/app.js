@@ -1,5 +1,6 @@
 // Importing express
 const express = require("express");
+const cors = require("cors");
 const connectDB = require("./config/database");
 // Instance of express application
 const app = express();
@@ -7,6 +8,12 @@ const User = require("./models/user");
 const cookieParser = require("cookie-parser");
 const { userAuth } = require("./middleware/auth");
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
