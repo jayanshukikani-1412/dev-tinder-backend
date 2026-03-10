@@ -145,6 +145,7 @@ app.patch("/user", userAuth, async (req, res) => {
   }
 });
 
+// Send Connection Request API ==>> POST /sendConnectionRequest ==>> Send connection request
 app.post("/sendConnectionRequest", userAuth, async (req, res) => {
   const user = req.user;
   res.send(user.firstName + " sent connection request !!");
