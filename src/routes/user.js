@@ -3,7 +3,8 @@ const { userAuth } = require("../middleware/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 const userRouter = express.Router();
-const USER_SAFE_DATA_KEY = "firstName lastName photoUrl emailId";
+const USER_SAFE_DATA_KEY =
+  "firstName lastName photoUrl emailId photoUrl about skills age gender";
 
 // get all the pending connection request for the loggedInUser
 userRouter.get("/user/request", userAuth, async (req, res) => {
