@@ -1,7 +1,7 @@
 const express = require("express");
 const { userAuth } = require("../middleware/auth");
 const ConnectionRequest = require("../models/connectionRequest");
-
+const User = require("../models/user");
 const userRouter = express.Router();
 const USER_SAFE_DATA_KEY = "firstName lastName photoUrl emailId";
 
@@ -40,7 +40,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         },
       ],
     })
-      .populate("fromUserId", USER_SAFE_DATA_KEY) 
+      .populate("fromUserId", USER_SAFE_DATA_KEY)
       .populate("toUserId", USER_SAFE_DATA_KEY);
 
     const data = connections.map((row) => {
@@ -56,6 +56,46 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
     });
   } catch (error) {
     res.status(400).send("ERROR : " + error.message);
+  }
+});
+
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+  try {
+    // User can see all cards except:
+    // 1. His Own Card
+    // 2. His Connection Card
+    // 3. Ignored People
+    // 4. Already sent connection request
+
+    const loggedInUser = req.user;
+
+    // Find all connection requests (sent + received)
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select("fromUserId toUserId");
+    // .populate("fromUserId", "firstName")
+    // .populate("toUserId", "firstName");
+
+    const hideUserFromFeed = new Set();
+    connectionRequests.forEach((req) => {
+      hideUserFromFeed.add(req.fromUserId.toString());
+      hideUserFromFeed.add(req.toUserId.toString());
+    });
+
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUserFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    }).select(USER_SAFE_DATA_KEY);
+
+    res.json({
+      message: "Data fetch successfully",
+      count: users.length,
+      data: users,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
